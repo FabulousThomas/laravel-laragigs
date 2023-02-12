@@ -16,19 +16,17 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// === SHOW ALL LISTINGS
 Route::get('/', [ListingController::class, 'index']);
 
-Route::get('/listing/{listing}', [ListingController::class, 'show']);
+// === SHOW CREATE FORM
+Route::get('/listings/create', [ListingController::class, 'create']);
 
-// Route::get('/hello', function () {
-//     return response('<h1>welcome to the world of laravel</h1>', 200)
-//         ->header('Content-Type', 'text/plain');
-// });
+// === STORE LISTING DATA
+Route::post('/listings', [ListingController::class, 'store']);
 
-// Route::get('/posts/{id}', function ($id) {
-//     return response('Post ' . $id);
-// })->where('id', '[0-9]+');
+// === SHOW SINGLE LISTING
+Route::get('/listings/{listing}', [ListingController::class, 'show']);
+// === ALWAYS AT THE END
 
-// Route::get('/search', function (Request $request) {
-//     return 'Name: ' . $request->name . ' and City: ' . $request->city;
-// });
+
