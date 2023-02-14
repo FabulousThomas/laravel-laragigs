@@ -13,5 +13,9 @@
         @endunless
 
     </div>
-    
+
+    <div class="mt-6 p-3">
+        {{ $listings->links() }}
+    </div>
+
 </x-layout>
