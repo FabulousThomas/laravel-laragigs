@@ -12,7 +12,7 @@ class ListingController extends Controller
     public function index()
     {
         return view('listings.index', [
-            'listings' => Listing::latest()->filter(request(['tag', 'search']))->get()
+            'listings' => Listing::latest()->filter(request(['tag', 'search']))->paginate(6)
         ]);
     }
 
@@ -35,7 +35,8 @@ class ListingController extends Controller
     {
         $formFields = $request->validate([
             'title' => 'required',
-            'company' => ['required', Rule::unique('listings', 'company')],
+            // 'company' => ['required', Rule::unique('listings', 'company')],
+            'company' => 'required',
             'location' => 'required',
             'email' => ['required', 'email'],
             'tags' => 'required',
@@ -43,8 +44,67 @@ class ListingController extends Controller
             'description' => 'required'
         ]);
 
+        if ($request->hasFile('logo')) {
+            $formFields['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+
+        $formFields['user_id'] = auth()->id();
+
         Listing::create($formFields);
 
         return redirect('/')->with('message', 'Listing Created Successfully!');
+    }
+
+    // === SHOW EDIT FORM
+    public function edit(Listing $listing)
+    {
+        return view('listings.edit', ['listing' => $listing]);
+    }
+
+    // === SHOW MANAGE LISTING
+    public function manage()
+    {
+        return view('listings.manage', ['listings' => auth()->user()->listings()->get()]);
+    }
+
+    // === UPDATE LISTING DATA
+    public function update(Request $request, Listing $listing)
+    {
+
+        // === MAKE SURE LOGGED IN USER IS OWNER
+        if ($listing->user_id != auth()->id()) {
+            abort(403, 'Unauthorized Action');
+        }
+
+        $formFields = $request->validate([
+            'title' => 'required',
+            // 'company' => ['required', Rule::unique('listings', 'company')],
+            'company' => 'required',
+            'location' => 'required',
+            'email' => ['required', 'email'],
+            'tags' => 'required',
+            'website' => 'required',
+            'description' => 'required'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $formFields['logo'] = $request->file('logo')->store('logos', 'public');
+        }
+
+        $listing->update($formFields);
+
+        return back()->with('message', 'Listing Updated Successfully!');
+    }
+
+    public function destroy(Listing $listing)
+    {
+        // === MAKE SURE LOGGED IN USER IS OWNER
+        if ($listing->user_id != auth()->id()) {
+            abort(403, 'Unauthorized Action');
+        }
+
+        $listing->delete();
+
+        return redirect('/')->with('message', 'Listing Deleted Successfully!');
     }
 }
